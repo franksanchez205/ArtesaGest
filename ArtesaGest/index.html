@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtesaGest - Gestión Artesanal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <h2>ArtesaGest</h2>
+            <ul>
+                <li><a href="#" onclick="showModule('dashboard')">Dashboard</a></li>
+                <li><a href="#" onclick="showModule('inventario')">Inventario</a></li>
+                <li><a href="#" onclick="showModule('contactos')">Contactos</a></li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <section id="dashboard" class="module">
+                <h1>Resumen General</h1>
+                <div class="stats-grid">
+                    <div class="card">Ventas: $0</div>
+                    <div class="card">Productos: 0</div>
+                </div>
+            </section>
+
+            <section id="inventario" class="module" style="display:none;">
+                <h1>Inventario de Artesanías</h1>
+                <button class="btn-primary">Nuevo Producto</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Material</th>
+                            <th>Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-list"></tbody>
+                </table>
+            </section>
+
+            <section id="contactos" class="module" style="display:none;">
+                <h1>Gestión de Contactos</h1>
+                <form id="contact-form">
+                    <input type="text" placeholder="Nombre del Cliente" required>
+                    <input type="email" placeholder="Correo Electrónico">
+                    <button type="submit" class="btn-primary">Guardar Contacto</button>
+                </form>
+                <ul id="contact-list" class="list"></ul>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
