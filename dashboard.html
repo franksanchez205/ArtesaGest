@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtesaGest - Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h1><i class="fas fa-cogs"></i> ArtesaGest</h1>
+        </div>
+        <div class="sidebar-nav">
+            <a href="dashboard.html" class="active"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a>
+            <a href="inventario.html"><i class="fas fa-boxes"></i> <span>Inventario</span></a>
+            <a href="produccion.html"><i class="fas fa-industry"></i> <span>Producción</span></a>
+            <a href="pos.html"><i class="fas fa-cash-register"></i> <span>Punto de Venta</span></a>
+            <a href="reportes.html"><i class="fas fa-file-alt"></i> <span>Reportes</span></a>
+            <a href="contactos.html"><i class="fas fa-address-book"></i> <span>Contactos</span></a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="header">
+            <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+            <div class="header-right">
+                <span id="userName"></span>
+                <a href="#" id="logoutBtn" class="btn btn-sm btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </a>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="page-header">
+                <h1>Panel de Control</h1>
+                <span id="currentDate" class="dashboard-date"></span>
+            </div>
+
+            <div class="grid grid-4 dashboard-grid">
+                <div class="stat-card primary">
+                    <i class="fas fa-boxes"></i>
+                    <h3><i class="fas fa-boxes"></i> Total Productos</h3>
+                    <div class="value" id="totalProducts">0</div>
+                </div>
+                <div class="stat-card success">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3><i class="fas fa-shopping-cart"></i> Ventas del Mes</h3>
+                    <div class="value" id="ventasMes">$0</div>
+                </div>
+                <div class="stat-card warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3><i class="fas fa-exclamation-triangle"></i> Stock Bajo</h3>
+                    <div class="value" id="stockBajo">0</div>
+                </div>
+                <div class="stat-card danger">
+                    <i class="fas fa-industry"></i>
+                    <h3><i class="fas fa-industry"></i> Órdenes Activas</h3>
+                    <div class="value" id="ordenesActivas">0</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2 dashboard-charts">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Ventas de los Últimos 7 Días</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="salesChart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Estado de Producción</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="productionChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Últimas Ventas</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Productos</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ultimasVentas"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+   
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
