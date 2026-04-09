@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtesaGest - Reportes</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/reportes.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h1><i class="fas fa-cogs"></i> ArtesaGest</h1>
+        </div>
+        <div class="sidebar-nav">
+            <a href="dashboard.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a>
+            <a href="inventario.html"><i class="fas fa-boxes"></i> <span>Inventario</span></a>
+            <a href="produccion.html"><i class="fas fa-industry"></i> <span>Producción</span></a>
+            <a href="pos.html"><i class="fas fa-cash-register"></i> <span>Punto de Venta</span></a>
+            <a href="reportes.html" class="active"><i class="fas fa-file-alt"></i> <span>Reportes</span></a>
+            <a href="contactos.html"><i class="fas fa-address-book"></i> <span>Contactos</span></a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="header">
+            <h2><i class="fas fa-file-alt"></i> Reportes</h2>
+            <div class="header-right">
+                <span id="userName"></span>
+                <a href="#" id="logoutBtn" class="btn btn-sm btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </a>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="page-header">
+                <h1>Reportes y Análisis</h1>
+                <button class="btn btn-success" onclick="Reportes.exportCSV()">
+                    <i class="fas fa-download"></i> Exportar CSV
+                </button>
+            </div>
+
+            <div class="reportes-filters">
+                <div class="filter-group">
+                    <label>Desde:</label>
+                    <input type="date" id="fechaDesde" onchange="Reportes.filter()">
+                </div>
+                <div class="filter-group">
+                    <label>Hasta:</label>
+                    <input type="date" id="fechaHasta" onchange="Reportes.filter()">
+                </div>
+                <div class="filter-group">
+                    <label>Método:</label>
+                    <select id="metodoFiltro" onchange="Reportes.filter()">
+                        <option value="">Todos</option>
+                        <option>Efectivo</option>
+                        <option>Tarjeta</option>
+                        <option>Transferencia</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="Reportes.resetFilters()">
+                    <i class="fas fa-redo"></i> Limpiar
+                </button>
+            </div>
+
+            <div class="reportes-stats">
+                <div class="stat-card success">
+                    <h3><i class="fas fa-dollar-sign"></i> Total Ventas</h3>
+                    <div class="value" id="totalVentas">$0</div>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-receipt"></i> Número de Ventas</h3>
+                    <div class="value" id="numVentas">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-chart-line"></i> Ticket Promedio</h3>
+                    <div class="value" id="ticketPromedio">$0</div>
+                </div>
+            </div>
+
+            <div class="reportes-charts">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Ventas por Día</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="salesByDayChart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Ventas por Método</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="salesByPaymentChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> Detalle de Ventas</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Método</th>
+                                    <th>Productos</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ventasTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/reportes.js"></script>
+</body>
+</html>
