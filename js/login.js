@@ -1,17 +1,18 @@
-// login.js
-window.onload = () => {
-    const btn = document.getElementById('btnLogin');
-    if (btn) {
-        btn.onclick = () => {
-            const user = document.getElementById('userInput').value;
-            const key = document.getElementById('keyInput').value;
-
-            if (user && key) {
-                localStorage.setItem('user', user);
-                localStorage.setItem('key', key);
-                window.location.href = 'est.html';
+window.onload = function() {
+    var form = document.getElementById('loginForm');
+    if (form) {
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            
+            if (DataStore.login(username, password)) {
+                window.location.href = 'dashboard.html';
             } else {
-                alert("Completa los datos");
+                var errorEl = document.getElementById('loginError');
+                if (errorEl) {
+                    errorEl.style.display = 'block';
+                }
             }
         };
     }
