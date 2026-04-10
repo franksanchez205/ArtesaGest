@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Inventario</title>
+    <style>
+        body { font-family: Arial, padding: 20px; }
+        .notification { 
+            position: fixed; top: 10px; right: 10px; padding: 15px 25px; 
+            background: #28a745; color: #fff; border-radius: 4px; display: none; z-index: 1000;
+        }
+        .notification.show { display: block; }
+        .notification.error { background: #dc3545; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; }
+        .modal-overlay.active { display: flex; align-items: center; justify-content: center; }
+        .modal { background: #fff; padding: 20px; border-radius: 8px; width: 400px; }
+        input, select, textarea { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f4f4f4; }
+        #log { background: #000; color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; margin-top: 20px; height: 150px; overflow-y: auto; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Test Inventario Simplificado</h1>
+    
+    <button onclick="Inventario.openModal()">+ Nuevo Producto</button>
+    <button onclick="testLocalStorage()">Test localStorage</button>
+    <button onclick="testSaveDirect()">Test save directo</button>
+    
+    <table id="productTable">
+        <thead><tr><th>Codigo</th><th>Nombre</th><th>Stock</th><th>Precio</th><th>Accion</th></tr></thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <h3 id="modalTitle">Nuevo Producto</h3>
+            <input type="hidden" id="productId">
+            <input type="text" id="codigo" placeholder="Codigo *" required>
+            <input type="text" id="nombre" placeholder="Nombre *" required>
+            <select id="categoria">
+                <option>Materia Prima</option>
+                <option>Productos Terminados</option>
+            </select>
+            <input type="number" id="stock" placeholder="Stock" value="0">
+            <input type="number" id="stockMinimo" placeholder="Stock Min" value="0">
+            <input type="number" id="precioUnitario" placeholder="Precio" value="0" step="0.01">
+            <div style="margin-top: 15px;">
+                <button type="button" onclick="Inventario.closeModal()">Cancelar</button>
+                <button type="button" onclick="Inventario.save()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification"></div>
+    <div id="log"></div>
+
+    <script src="js/data.js"></script>
+    <script>
+        function log(msg) {
+            document.getElementById('log').textContent += new Date().toLocaleTimeString() + ': ' + msg + '\n';
+            console.log(msg);
+        }
+
+        function showNotification(msg, isError) {
+            var el = document.getElementById('notification');
+            el.textContent = msg;
+            el.className = 'notification' + (isError ? ' error' : '');
+            el.classList.add('show');
+            log('NOTIFICATION: ' + msg + (isError ? ' [ERROR]' : ''));
+            setTimeout(function() { el.classList.remove('show'); }, 3000);
+        }
+
+        var Inventario = {
+            items: [],
+
+            init: function() {
+                log('Inventario.init()');
+                DataStore.init();
+                this.loadData();
+                this.render();
+            },
+
+            loadData: function() {
+                this.items = DataStore.getInventario();
+                log('loadData: ' + this.items.length + ' items');
+            },
+
+            saveData: function() {
+                log('saveData: guardando ' + this.items.length + ' items');
+                DataStore.setInventario(this.items);
+                var check = DataStore.getInventario();
+                log('saveData: verificado, localStorage tiene ' + check.length + ' items');
+            },
+
+            render: function() {
+                var tbody = document.getElementById('tableBody');
+                var html = '';
+                for (var i = 0; i < this.items.length; i++) {
+                    var item = this.items[i];
+                    html += '<tr>';
+                    html += '<td>' + item.codigo + '</td>';
+                    html += '<td>' + item.nombre + '</td>';
+                    html += '<td>' + item.stock + '</td>';
+                    html += '<td>$' + item.precioUnitario + '</td>';
+                    html += '<td><button onclick="Inventario.delete(' + item.id + ')">X</button></td>';
+                    html += '</tr>';
+                }
+                tbody.innerHTML = html || '<tr><td colspan="5">Sin productos</td></tr>';
+            },
+
+            openModal: function(id) {
+                log('openModal: ' + (id || 'nuevo'));
+                document.getElementById('productId').value = id || '';
+                document.getElementById('codigo').value = '';
+                document.getElementById('nombre').value = '';
+                document.getElementById('categoria').value = 'Materia Prima';
+                document.getElementById('stock').value = '0';
+                document.getElementById('stockMinimo').value = '0';
+                document.getElementById('precioUnitario').value = '0';
+                document.getElementById('modal').classList.add('active');
+            },
+
+            closeModal: function() {
+                log('closeModal');
+                document.getElementById('modal').classList.remove('active');
+            },
+
+            save: function() {
+                log('save: INICIO');
+                var idValue = document.getElementById('productId').value;
+                var isEdit = idValue !== '';
+                log('save: isEdit=' + isEdit);
+
+                var codigo = document.getElementById('codigo').value.trim();
+                var nombre = document.getElementById('nombre').value.trim();
+                var categoria = document.getElementById('categoria').value;
+                var stock = parseInt(document.getElementById('stock').value) || 0;
+                var stockMinimo = parseInt(document.getElementById('stockMinimo').value) || 0;
+                var precioUnitario = parseFloat(document.getElementById('precioUnitario').value) || 0;
+
+                log('save: codigo=' + codigo + ', nombre=' + nombre);
+
+                if (!codigo || !nombre) {
+                    showNotification('Codigo y nombre requeridos', true);
+                    return;
+                }
+
+                if (isEdit) {
+                    var idNum = parseInt(idValue);
+                    log('save: editando id=' + idNum);
+                    for (var i = 0; i < this.items.length; i++) {
+                        if (parseInt(this.items[i].id) === idNum) {
+                            this.items[i].codigo = codigo;
+                            this.items[i].nombre = nombre;
+                            this.items[i].categoria = categoria;
+                            this.items[i].stock = stock;
+                            this.items[i].stockMinimo = stockMinimo;
+                            this.items[i].precioUnitario = precioUnitario;
+                            log('save: item actualizado');
+                            break;
+                        }
+                    }
+                } else {
+                    var maxId = 0;
+                    for (var j = 0; j < this.items.length; j++) {
+                        var currId = parseInt(this.items[j].id);
+                        if (currId > maxId) maxId = currId;
+                    }
+                    log('save: nuevo item, maxId=' + maxId);
+                    this.items.push({
+                        id: maxId + 1,
+                        codigo: codigo,
+                        nombre: nombre,
+                        categoria: categoria,
+                        stock: stock,
+                        stockMinimo: stockMinimo,
+                        precioUnitario: precioUnitario
+                    });
+                    log('save: item agregado, total=' + this.items.length);
+                }
+
+                this.saveData();
+                this.render();
+                this.closeModal();
+                showNotification(isEdit ? 'Producto actualizado' : 'Producto agregado');
+                log('save: FIN');
+            },
+
+            delete: function(id) {
+                log('delete: id=' + id);
+                var newItems = [];
+                for (var i = 0; i < this.items.length; i++) {
+                    if (parseInt(this.items[i].id) !== id) {
+                        newItems.push(this.items[i]);
+                    }
+                }
+                this.items = newItems;
+                this.saveData();
+                this.render();
+                showNotification('Producto eliminado');
+            }
+        };
+
+        function testLocalStorage() {
+            log('=== TEST localStorage ===');
+            log('localStorage setItem test');
+            localStorage.setItem('test_key', JSON.stringify({ value: 123 }));
+            var val = localStorage.getItem('test_key');
+            log('localStorage getItem: ' + val);
+        }
+
+        function testSaveDirect() {
+            log('=== TEST save directo ===');
+            Inventario.items.push({
+                id: 999,
+                codigo: 'DIR001',
+                nombre: 'Test Directo',
+                categoria: 'Test',
+                stock: 10,
+                stockMinimo: 5,
+                precioUnitario: 100
+            });
+            Inventario.saveData();
+            Inventario.render();
+        }
+
+        Inventario.init();
+    </script>
+</body>
+</html>

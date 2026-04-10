@@ -50,10 +50,14 @@ var POS = {
         var html = '';
         for (var i = 0; i < this.productos.length; i++) {
             var p = this.productos[i];
+            if (!p || !p.id) continue;
+            var nombre = p.nombre || 'Sin nombre';
+            var precio = parseFloat(p.precioUnitario) || 0;
+            var stock = parseInt(p.stock) || 0;
             html += '<div class="pos-product" onclick="POS.addToCart(' + p.id + ')">';
-            html += '<div class="name">' + p.nombre + '</div>';
-            html += '<div class="price">$' + p.precioUnitario.toLocaleString() + '</div>';
-            html += '<div class="stock">Stock: ' + p.stock + '</div>';
+            html += '<div class="name">' + nombre + '</div>';
+            html += '<div class="price">$' + precio.toLocaleString() + '</div>';
+            html += '<div class="stock">Stock: ' + stock + '</div>';
             html += '</div>';
         }
         grid.innerHTML = html;
@@ -64,7 +68,10 @@ var POS = {
         var filtered = [];
         for (var i = 0; i < this.productos.length; i++) {
             var p = this.productos[i];
-            if (p.nombre.toLowerCase().indexOf(query) !== -1 || p.codigo.toLowerCase().indexOf(query) !== -1) {
+            if (!p) continue;
+            var nombre = (p.nombre || '').toLowerCase();
+            var codigo = (p.codigo || '').toLowerCase();
+            if (nombre.indexOf(query) !== -1 || codigo.indexOf(query) !== -1) {
                 filtered.push(p);
             }
         }
@@ -75,7 +82,7 @@ var POS = {
         var grid = document.getElementById('productsGrid');
         if (!grid) return;
 
-        if (productos.length === 0) {
+        if (!productos || productos.length === 0) {
             grid.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1/-1;">Sin resultados</p>';
             return;
         }
@@ -83,10 +90,14 @@ var POS = {
         var html = '';
         for (var i = 0; i < productos.length; i++) {
             var p = productos[i];
+            if (!p || !p.id) continue;
+            var nombre = p.nombre || 'Sin nombre';
+            var precio = parseFloat(p.precioUnitario) || 0;
+            var stock = parseInt(p.stock) || 0;
             html += '<div class="pos-product" onclick="POS.addToCart(' + p.id + ')">';
-            html += '<div class="name">' + p.nombre + '</div>';
-            html += '<div class="price">$' + p.precioUnitario.toLocaleString() + '</div>';
-            html += '<div class="stock">Stock: ' + p.stock + '</div>';
+            html += '<div class="name">' + nombre + '</div>';
+            html += '<div class="price">$' + precio.toLocaleString() + '</div>';
+            html += '<div class="stock">Stock: ' + stock + '</div>';
             html += '</div>';
         }
         grid.innerHTML = html;
@@ -97,7 +108,7 @@ var POS = {
         var totalEl = document.getElementById('cartTotal');
         if (!container) return;
 
-        if (this.carrito.length === 0) {
+        if (!this.carrito || this.carrito.length === 0) {
             container.innerHTML = '<div class="pos-empty"><i class="fas fa-shopping-cart"></i><p>Carrito vacío</p></div>';
             if (totalEl) totalEl.textContent = '$0.00';
             return;
@@ -106,11 +117,15 @@ var POS = {
         var html = '';
         for (var i = 0; i < this.carrito.length; i++) {
             var item = this.carrito[i];
+            if (!item) continue;
+            var nombre = item.nombre || 'Sin nombre';
+            var precio = parseFloat(item.precioUnitario) || 0;
+            var cantidad = parseInt(item.cantidad) || 1;
             html += '<div class="pos-cart-item">';
-            html += '<div class="pos-cart-item-info"><strong>' + item.nombre + '</strong><br><small>$' + item.precioUnitario + ' x ' + item.cantidad + '</small></div>';
+            html += '<div class="pos-cart-item-info"><strong>' + nombre + '</strong><br><small>$' + precio + ' x ' + cantidad + '</small></div>';
             html += '<div class="pos-cart-item-actions">';
             html += '<button class="qty-btn" onclick="POS.decreaseQty(' + i + ')">-</button>';
-            html += '<span>' + item.cantidad + '</span>';
+            html += '<span>' + cantidad + '</span>';
             html += '<button class="qty-btn" onclick="POS.increaseQty(' + i + ')">+</button>';
             html += '<button class="remove-btn" onclick="POS.removeFromCart(' + i + ')"><i class="fas fa-times"></i></button>';
             html += '</div></div>';
@@ -119,7 +134,10 @@ var POS = {
 
         var total = 0;
         for (var j = 0; j < this.carrito.length; j++) {
-            total += this.carrito[j].precioUnitario * this.carrito[j].cantidad;
+            var item = this.carrito[j];
+            if (item) {
+                total += (parseFloat(item.precioUnitario) || 0) * (parseInt(item.cantidad) || 1);
+            }
         }
         if (totalEl) totalEl.textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2 });
     },
@@ -134,6 +152,7 @@ var POS = {
         }
         if (!producto) return;
 
+        var stockProducto = parseInt(producto.stock) || 0;
         var existing = null;
         for (var j = 0; j < this.carrito.length; j++) {
             if (this.carrito[j].id === id) {
@@ -143,14 +162,14 @@ var POS = {
         }
 
         if (existing) {
-            if (existing.cantidad < producto.stock) {
+            if (existing.cantidad < stockProducto) {
                 existing.cantidad++;
             } else {
                 showNotification('Stock insuficiente', true);
                 return;
             }
         } else {
-            if (producto.stock < 1) {
+            if (stockProducto < 1) {
                 showNotification('Sin stock', true);
                 return;
             }
@@ -159,7 +178,7 @@ var POS = {
                 nombre: producto.nombre,
                 precioUnitario: producto.precioUnitario,
                 cantidad: 1,
-                stock: producto.stock
+                stock: stockProducto
             });
         }
         this.renderCart();
@@ -204,9 +223,13 @@ var POS = {
     calculateCambio: function() {
         var total = 0;
         for (var i = 0; i < this.carrito.length; i++) {
-            total += this.carrito[i].precioUnitario * this.carrito[i].cantidad;
+            var item = this.carrito[i];
+            if (item) {
+                total += (parseFloat(item.precioUnitario) || 0) * (parseInt(item.cantidad) || 1);
+            }
         }
-        var pagoCon = parseFloat(document.getElementById('pagoCon').value) || 0;
+        var pagoInput = document.getElementById('pagoCon');
+        var pagoCon = parseFloat(pagoInput ? pagoInput.value : 0) || 0;
         var cambio = Math.max(0, pagoCon - total);
         var cambioEl = document.getElementById('cambio');
         if (cambioEl) {
@@ -215,17 +238,21 @@ var POS = {
     },
 
     completeSale: function() {
-        if (this.carrito.length === 0) {
+        if (!this.carrito || this.carrito.length === 0) {
             showNotification('Agregue productos al carrito', true);
             return;
         }
 
         var total = 0;
         for (var i = 0; i < this.carrito.length; i++) {
-            total += this.carrito[i].precioUnitario * this.carrito[i].cantidad;
+            var item = this.carrito[i];
+            if (item) {
+                total += (parseFloat(item.precioUnitario) || 0) * (parseInt(item.cantidad) || 1);
+            }
         }
 
-        var pagoCon = parseFloat(document.getElementById('pagoCon').value) || total;
+        var pagoInput = document.getElementById('pagoCon');
+        var pagoCon = parseFloat(pagoInput ? pagoInput.value : 0) || total;
         var cambio = Math.max(0, pagoCon - total);
 
         var maxId = 0;
@@ -235,19 +262,24 @@ var POS = {
 
         var productosVenta = [];
         for (var k = 0; k < this.carrito.length; k++) {
-            productosVenta.push({
-                id: this.carrito[k].id,
-                nombre: this.carrito[k].nombre,
-                cantidad: this.carrito[k].cantidad,
-                precioUnitario: this.carrito[k].precioUnitario
-            });
+            var item = this.carrito[k];
+            if (item) {
+                productosVenta.push({
+                    id: item.id,
+                    nombre: item.nombre,
+                    cantidad: item.cantidad,
+                    precioUnitario: item.precioUnitario
+                });
+            }
         }
 
+        var clienteInput = document.getElementById('cliente');
+        var metodoInput = document.getElementById('metodoPago');
         var venta = {
             id: maxId + 1,
             fecha: new Date().toISOString(),
-            cliente: document.getElementById('cliente').value || 'Venta directa',
-            metodoPago: document.getElementById('metodoPago').value,
+            cliente: clienteInput ? clienteInput.value : 'Venta directa',
+            metodoPago: metodoInput ? metodoInput.value : 'Efectivo',
             productos: productosVenta,
             total: total,
             pagoCon: pagoCon,
@@ -271,9 +303,11 @@ var POS = {
 
     updateInventory: function() {
         for (var i = 0; i < this.carrito.length; i++) {
+            var cartItem = this.carrito[i];
+            if (!cartItem) continue;
             for (var j = 0; j < this.productos.length; j++) {
-                if (this.productos[j].id === this.carrito[i].id) {
-                    this.productos[j].stock -= this.carrito[i].cantidad;
+                if (this.productos[j].id === cartItem.id) {
+                    this.productos[j].stock -= parseInt(cartItem.cantidad) || 1;
                     break;
                 }
             }
