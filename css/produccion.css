@@ -1,0 +1,45 @@
+.produccion-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.produccion-stats .stat-card {
+    text-align: center;
+    padding: 20px;
+}
+
+.produccion-stats .stat-card i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.produccion-stats .stat-card .value {
+    font-size: 2.5rem;
+}
+
+@media (max-width: 900px) {
+    .produccion-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .produccion-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+.estado-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.estado-badge.corte { background: #fff3cd; color: #856404; }
+.estado-badge.lijado { background: #cce5ff; color: #004085; }
+.estado-badge.pintura { background: #d1ecf1; color: #0c5460; }
+.estado-badge.terminado { background: #d4edda; color: #155724; }

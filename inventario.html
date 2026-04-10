@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtesaGest - Inventario</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/inventario.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h1><i class="fas fa-cogs"></i> ArtesaGest</h1>
+        </div>
+        <div class="sidebar-nav">
+            <a href="dashboard.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a>
+            <a href="inventario.html" class="active"><i class="fas fa-boxes"></i> <span>Inventario</span></a>
+            <a href="produccion.html"><i class="fas fa-industry"></i> <span>Producción</span></a>
+            <a href="pos.html"><i class="fas fa-cash-register"></i> <span>Punto de Venta</span></a>
+            <a href="reportes.html"><i class="fas fa-file-alt"></i> <span>Reportes</span></a>
+            <a href="contactos.html"><i class="fas fa-address-book"></i> <span>Contactos</span></a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="header">
+            <h2><i class="fas fa-boxes"></i> Inventario</h2>
+            <div class="header-right">
+                <span id="userName"></span>
+                <a href="#" id="logoutBtn" class="btn btn-sm btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </a>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="page-header">
+                <h1>Gestión de Inventario</h1>
+                <button class="btn btn-primary" onclick="Inventario.openModal()">
+                    <i class="fas fa-plus"></i> Nuevo Producto
+                </button>
+            </div>
+
+            <div id="stockAlert" class="alert alert-warning" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Atención:</strong> Hay productos con stock bajo que requieren reposición.
+            </div>
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar producto..." oninput="Inventario.search()">
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Stock</th>
+                                    <th>Stock Mín.</th>
+                                    <th>Precio</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventarioTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nuevo Producto</h3>
+                <button class="modal-close" onclick="Inventario.closeModal()">&times;</button>
+            </div>
+            <form id="productForm">
+                <div class="modal-body">
+                    <input type="hidden" id="productId">
+                    <div class="form-group">
+                        <label>Código *</label>
+                        <input type="text" id="codigo" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="nombre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="categoria" class="form-control">
+                            <option>Materia Prima</option>
+                            <option>Materiales</option>
+                            <option>Productos Terminados</option>
+                            <option>Herramientas</option>
+                            <option>Insumos</option>
+                        </select>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Stock Actual *</label>
+                            <input type="number" id="stock" class="form-control" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Stock Mínimo *</label>
+                            <input type="number" id="stockMinimo" class="form-control" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio Unitario *</label>
+                        <input type="number" id="precioUnitario" class="form-control" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="descripcion" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="Inventario.closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/inventario.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+.low-stock-row {
+    background-color: rgba(231, 76, 60, 0.1) !important;
+}
+
+.low-stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(231, 76, 60, 0.1);
+    color: var(--danger);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+@media (max-width: 500px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
