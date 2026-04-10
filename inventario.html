@@ -10,6 +10,13 @@
     <link rel="stylesheet" href="css/modal.css">
     <link rel="stylesheet" href="css/inventario.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
 </head>
 <body>
     <nav class="sidebar">
@@ -53,6 +60,38 @@
             <div class="search-box">
                 <i class="fas fa-search"></i>
                 <input type="text" id="searchInput" placeholder="Buscar producto..." oninput="Inventario.search()">
+            </div>
+
+            <div class="ai-consulta-section">
+                <div class="ai-header">
+                    <h3><i class="fas fa-robot"></i> Asistente de Inventario IA</h3>
+                    <button class="btn btn-sm btn-toggle" onclick="Inventario.toggleAI()">
+                        <i class="fas fa-chevron-down" id="aiToggleIcon"></i>
+                    </button>
+                </div>
+                <div class="ai-content" id="aiContent" style="display: none;">
+                    <div class="ai-api-key">
+                        <label><i class="fas fa-key"></i> Gemini API Key:</label>
+                        <input type="password" id="apiKeyInventario" placeholder="AIzaSy..." size="35">
+                        <button class="btn btn-sm btn-secondary" onclick="InventarioAI.guardarKey()">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                        <span id="keyStatusInventario" class="key-status"></span>
+                    </div>
+                    <div class="ai-input-area">
+                        <textarea id="preguntaInventario" placeholder="Ej: ¿Qué productos tienen stock bajo? ¿Cuáles recomienda reponer?"></textarea>
+                        <button class="btn btn-primary" id="btnConsultarIA">
+                            <i class="fas fa-paper-plane"></i> Consultar
+                        </button>
+                    </div>
+                    <div class="ai-loader" id="aiLoaderInventario" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i> Analizando inventario...
+                    </div>
+                    <div class="ai-output" id="aiOutputInventario" style="display: none;">
+                        <h4><i class="fas fa-lightbulb"></i> Respuesta del Asistente:</h4>
+                        <div id="aiRespuestaTexto"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="card">

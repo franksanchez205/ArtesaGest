@@ -24,3 +24,139 @@
         grid-template-columns: 1fr;
     }
 }
+
+.ai-consulta-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, var(--primary) 0%, #2980b9 100%);
+    color: white;
+}
+
+.ai-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-toggle {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-toggle:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.ai-content {
+    padding: 20px;
+}
+
+.ai-api-key {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+}
+
+.ai-api-key label {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.ai-api-key input {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.key-status {
+    font-size: 0.85rem;
+    color: var(--success);
+}
+
+.key-status.error {
+    color: var(--danger);
+}
+
+.ai-input-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.ai-input-area textarea {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--input-bg);
+    color: var(--text-color);
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.ai-input-area textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.ai-loader {
+    text-align: center;
+    padding: 20px;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.ai-output {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.ai-output h4 {
+    margin: 0 0 10px 0;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-output #aiRespuestaTexto {
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.ai-output #aiRespuestaTexto ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.ai-output #aiRespuestaTexto li {
+    margin-bottom: 5px;
+}

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtesaGest - Tests</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a2e; color: #fff; }
+        h1 { color: #e94560; }
+        .test-section { margin: 20px 0; padding: 15px; background: #16213e; border-radius: 8px; }
+        .test-item { padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .pass { background: #1b4332; color: #95d5b2; }
+        .fail { background: #6d1a1a; color: #ff6b6b; }
+        .error { background: #5c3d0e; color: #ffd93d; padding: 10px; margin: 5px 0; border-radius: 4px; font-family: monospace; white-space: pre-wrap; }
+        .btn { padding: 10px 20px; background: #e94560; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .btn:hover { background: #c73e54; }
+        #summary { font-size: 18px; margin: 20px 0; padding: 15px; background: #0f3460; border-radius: 8px; }
+        #console { background: #000; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>ArtesaGest - Pruebas de Validación</h1>
+    
+    <button class="btn" onclick="runAllTests()">Ejecutar Todas las Pruebas</button>
+    <button class="btn" onclick="runDataStoreTests()">Probar DataStore</button>
+    <button class="btn" onclick="runInventoryTests()">Probar Inventario</button>
+    <button class="btn" onclick="runAuthTests()">Probar Auth</button>
+    <button class="btn" onclick="clearAllData()">Limpiar Todo (Reset)</button>
+    
+    <div id="summary"></div>
+    <div id="results"></div>
+    
+    <h3>Consola:</h3>
+    <div id="console"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        var testResults = [];
+        var consoleLog = [];
+        
+        function log(msg) {
+            consoleLog.push(msg);
+            document.getElementById('console').textContent = consoleLog.join('\n');
+            console.log(msg);
+        }
+        
+        function assert(condition, testName, details) {
+            var result = { name: testName, pass: condition, details: details || '' };
+            testResults.push(result);
+            return condition;
+        }
+        
+        function showResults() {
+            var passed = 0, failed = 0, errors = 0;
+            var html = '';
+            
+            for (var i = 0; i < testResults.length; i++) {
+                var r = testResults[i];
+                var cls = r.pass ? 'pass' : 'fail';
+                if (r.details) {
+                    html += '<div class="test-item ' + cls + '">' + (r.pass ? '✓' : '✗') + ' ' + r.name + '</div>';
+                    html += '<div class="error">' + r.details + '</div>';
+                } else {
+                    html += '<div class="test-item ' + cls + '">' + (r.pass ? '✓' : '✗') + ' ' + r.name + '</div>';
+                }
+                if (r.pass) passed++; else failed++;
+            }
+            
+            document.getElementById('results').innerHTML = html;
+            document.getElementById('summary').innerHTML = 
+                '<b>Total:</b> ' + testResults.length + ' | <b>Pasan:</b> ' + passed + ' | <b>Fallas:</b> ' + failed;
+        }
+        
+        function clearAllData() {
+            if (confirm('¿Limpiar TODOS los datos? Esto borrara inventario, ventas, etc.')) {
+                localStorage.clear();
+                DataStore.init();
+                log('Datos limpiados y reinicializados');
+                testResults = [];
+                showResults();
+            }
+        }
+        
+        // ==================== DATASTORE TESTS ====================
+        function runDataStoreTests() {
+            testResults = [];
+            log('\n=== DATASTORE TESTS ===');
+            
+            // Test 1: DataStore existe
+            assert(typeof DataStore !== 'undefined', 'DataStore esta definido');
+            
+            // Test 2: Inicializacion
+            DataStore.init();
+            var users = DataStore.getJSON(DataStore.USERS_KEY);
+            assert(users.length >= 2, 'Usuarios inicializados', 'Cantidad: ' + users.length);
+            
+            // Test 3: Login exitoso
+            var loginResult = DataStore.login('admin', '123456');
+            assert(loginResult === true, 'Login admin exitoso');
+            
+            // Test 4: Login fallido
+            var loginFail = DataStore.login('admin', 'wrong');
+            assert(loginFail === false, 'Login con password incorrecto falla');
+            
+            // Test 5: GetUser
+            var user = DataStore.getUser();
+            assert(user !== null, 'GetUser retorna usuario', 'Usuario: ' + (user ? user.username : 'null'));
+            assert(user && user.username === 'admin', 'Usuario es admin');
+            
+            // Test 6: Inventario vacio inicial
+            var inv = DataStore.getInventario();
+            assert(Array.isArray(inv), 'Inventario es array', 'Length: ' + inv.length);
+            
+            // Test 7: Guardar en Inventario
+            var testItem = { id: 1, codigo: 'TEST001', nombre: 'Test Product', categoria: 'Test', stock: 10, stockMinimo: 5, precioUnitario: 100 };
+            DataStore.setInventario([testItem]);
+            var retrieved = DataStore.getInventario();
+            assert(retrieved.length === 1, 'Item guardado en inventario');
+            assert(retrieved[0].codigo === 'TEST001', 'Item recuperado correctamente', 'Codigo: ' + retrieved[0].codigo);
+            
+            // Test 8: Agregar otro item
+            var testItem2 = { id: 2, codigo: 'TEST002', nombre: 'Test Product 2', categoria: 'Test', stock: 20, stockMinimo: 5, precioUnitario: 200 };
+            var items = DataStore.getInventario();
+            items.push(testItem2);
+            DataStore.setInventario(items);
+            var retrieved2 = DataStore.getInventario();
+            assert(retrieved2.length === 2, 'Segundo item agregado', 'Total: ' + retrieved2.length);
+            
+            // Test 9: Actualizar item
+            for (var i = 0; i < retrieved2.length; i++) {
+                if (retrieved2[i].id === 1) {
+                    retrieved2[i].stock = 99;
+                    break;
+                }
+            }
+            DataStore.setInventario(retrieved2);
+            var updated = DataStore.getInventario();
+            var stockUpdated = false;
+            for (var j = 0; j < updated.length; j++) {
+                if (updated[j].id === 1 && updated[j].stock === 99) {
+                    stockUpdated = true;
+                    break;
+                }
+            }
+            assert(stockUpdated, 'Item actualizado correctamente');
+            
+            // Test 10: Eliminar item
+            var filtered = [];
+            for (var k = 0; k < updated.length; k++) {
+                if (updated[k].id !== 1) {
+                    filtered.push(updated[k]);
+                }
+            }
+            DataStore.setInventario(filtered);
+            var afterDelete = DataStore.getInventario();
+            assert(afterDelete.length === 1, 'Item eliminado', 'Restantes: ' + afterDelete.length);
+            
+            showResults();
+            log('DataStore tests completados');
+        }
+        
+        // ==================== INVENTORY TESTS ====================
+        function runInventoryTests() {
+            testResults = [];
+            log('\n=== INVENTORY TESTS ===');
+            
+            // Limpiar y preparar
+            DataStore.init();
+            DataStore.setInventario([]);
+            
+            // Simular Inventario
+            var Inventario = {
+                items: [],
+                saveData: function() {
+                    DataStore.setInventario(this.items);
+                }
+            };
+            
+            // Test 1: Inventario vacio
+            Inventario.items = DataStore.getInventario();
+            assert(Inventario.items.length === 0, 'Inventario vacio al inicio');
+            
+            // Test 2: Agregar producto
+            var maxId = 0;
+            for (var i = 0; i < Inventario.items.length; i++) {
+                if (Inventario.items[i].id > maxId) maxId = Inventario.items[i].id;
+            }
+            Inventario.items.push({
+                id: maxId + 1,
+                codigo: 'PROD001',
+                nombre: 'Producto de Prueba',
+                categoria: 'Productos Terminados',
+                stock: 15,
+                stockMinimo: 5,
+                precioUnitario: 1500
+            });
+            Inventario.saveData();
+            assert(Inventario.items.length === 1, 'Producto agregado', 'Total: ' + Inventario.items.length);
+            
+            // Test 3: Producto en localStorage
+            var fromStorage = DataStore.getInventario();
+            assert(fromStorage.length === 1, 'Producto persiste en localStorage');
+            assert(fromStorage[0].nombre === 'Producto de Prueba', 'Datos correctos');
+            
+            // Test 4: Editar producto
+            for (var j = 0; j < Inventario.items.length; j++) {
+                if (Inventario.items[j].id === 1) {
+                    Inventario.items[j].stock = 25;
+                    Inventario.items[j].precioUnitario = 2000;
+                    break;
+                }
+            }
+            Inventario.saveData();
+            var edited = DataStore.getInventario();
+            var editOk = false;
+            for (var k = 0; k < edited.length; k++) {
+                if (edited[k].id === 1 && edited[k].stock === 25 && edited[k].precioUnitario === 2000) {
+                    editOk = true;
+                    break;
+                }
+            }
+            assert(editOk, 'Producto editado correctamente');
+            
+            // Test 5: Eliminar producto
+            var newItems = [];
+            for (var m = 0; m < Inventario.items.length; m++) {
+                if (Inventario.items[m].id !== 1) {
+                    newItems.push(Inventario.items[m]);
+                }
+            }
+            Inventario.items = newItems;
+            Inventario.saveData();
+            assert(Inventario.items.length === 0, 'Producto eliminado');
+            
+            // Test 6: Múltiples productos
+            for (var n = 0; n < 3; n++) {
+                var currentMax = 0;
+                for (var p = 0; p < Inventario.items.length; p++) {
+                    if (Inventario.items[p].id > currentMax) currentMax = Inventario.items[p].id;
+                }
+                Inventario.items.push({
+                    id: currentMax + 1,
+                    codigo: 'PROD00' + (n + 1),
+                    nombre: 'Producto ' + (n + 1),
+                    categoria: 'Test',
+                    stock: 10,
+                    stockMinimo: 5,
+                    precioUnitario: 100
+                });
+            }
+            Inventario.saveData();
+            assert(Inventario.items.length === 3, 'Multiple productos', 'Total: ' + Inventario.items.length);
+            
+            showResults();
+            log('Inventory tests completados');
+        }
+        
+        // ==================== AUTH TESTS ====================
+        function runAuthTests() {
+            testResults = [];
+            log('\n=== AUTH TESTS ===');
+            
+            // Test 1: Auth existe
+            assert(typeof Auth !== 'undefined', 'Auth esta definido');
+            
+            // Test 2: requireAuth sin usuario
+            localStorage.removeItem(DataStore.USER_KEY);
+            var userBefore = DataStore.getUser();
+            assert(userBefore === null, 'Sin usuario logueado');
+            
+            // Test 3: Login y getUser
+            DataStore.login('artesano', '123456');
+            var userAfter = DataStore.getUser();
+            assert(userAfter !== null, 'Usuario logueado');
+            assert(userAfter.username === 'artesano', 'Usuario correcto');
+            assert(userAfter.rol === 'artesano', 'Rol correcto');
+            
+            // Test 4: Logout
+            DataStore.logout();
+            var afterLogout = DataStore.getUser();
+            assert(afterLogout === null, 'Logout exitoso');
+            
+            // Test 5: showNotification existe
+            assert(typeof showNotification === 'function', 'showNotification existe');
+            
+            showResults();
+            log('Auth tests completados');
+        }
+        
+        function runAllTests() {
+            consoleLog = [];
+            testResults = [];
+            log('=== EJECUTANDO TODAS LAS PRUEBAS ===\n');
+            runDataStoreTests();
+            runInventoryTests();
+            runAuthTests();
+            log('\n=== TODAS LAS PRUEBAS COMPLETADAS ===');
+            log('Total tests: ' + testResults.length);
+            var passed = 0, failed = 0;
+            for (var i = 0; i < testResults.length; i++) {
+                if (testResults[i].pass) passed++; else failed++;
+            }
+            log('Pasan: ' + passed + ' | Fallas: ' + failed);
+        }
+    </script>
+</body>
+</html>
